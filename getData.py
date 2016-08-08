@@ -20,6 +20,13 @@ def main():
     pass
 
 
+# Root page 
+@app.route("/")
+def rootPage():
+    return 'This is the root page'
+
+
+
 # Get all user data
 @app.route("/api/data/")
 def getData():
@@ -45,8 +52,9 @@ def getUserData(userId):
 # Use KMeans clustering on my dataset
 @app.route("/api/clustered/")
 def performClustering():
-    testClustering()
-    return 'done'
+    result = testClustering()
+    testKmeans()
+    return str(result)
 
 
 # Test the SVM clustering library on example data
@@ -65,14 +73,29 @@ def testClustering():
     clf.fit(iris.data, iris.target)
 
     # Give a piece of sample data to predict which cluster group it fits into
-    print(clf.predict([[6.0, 3.6, 5.2, 1.9]]))
+    result = clf.predict([[6.0, 3.6, 5.2, 1.9]])
     # Fits into group 2!
 
-    pass
+    return result
+
 
 # This will be an example of the k-means clustering algorithm,
 # which is an unsupervised learning algorithm
 def testKmeans():
+    
+    iris = datasets.load_iris()
+
+    # We are clustering n observations into k clusters
+    # Initialise the object
+    kmeans_iris = KMeans(n_clusters=3, init='k-means++', n_init=5, max_iter=300)
+
+    kmeans_iris.fit(iris.data)
+
+    # Get attributes of the clustering operation
+    print('kmeans_iris cluster centers')
+    print(kmeans_iris.cluster_centers_)
+    print('kmeans_iris labels')
+    print(kmeans_iris.labels_)
     pass
 
 
