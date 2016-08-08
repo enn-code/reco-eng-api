@@ -1,5 +1,6 @@
 """Script to get mongodb data"""
 import sys
+import json
 from pymongo import MongoClient
 
 from flask import Flask, request
@@ -16,7 +17,7 @@ print('test outside function')
 def main():
     """Main entry point for the script."""
     print('testing...')
-    app.run()
+    app.run(debug=True) # debug lets us auto reload on code changes
     pass
 
 
@@ -35,10 +36,19 @@ def getData():
     coll = db.training_data
     cursorObject = coll.find()
     data_array = []
+    data_dict = []
+
+    data_tags = ['animals', 'cats', 'cute', 'funny', 'fruit', 'food', 'vegetables', 'feminism', 'sport', 'women', 'men', 'sexy', 'hot', 'football', 'athletics', 'hockey', 'training', 'routines', 'healthy', 'workout', 'tv', 'celebrity', 'movies', 'comedy', 'drama', 'youtube']
 
     for document in cursorObject:
-        data_array.append(document)
+        data_dict.append(document)
+        data_array.append(document['Tags'].split(","))
         print(document)
+
+    print(data_array[0])
+    print('json test')
+    print(type(data_array))
+    print(data_array)
 
     return str(data_array)
 
@@ -52,14 +62,28 @@ def getUserData(userId):
 # Use KMeans clustering on my dataset
 @app.route("/api/clustered/")
 def performClustering():
-    result = testClustering()
-    testKmeans()
+    result = firstKmeans()
     return str(result)
+
+
+# First attempt at KMeans with our main dataset
+# Needs: Our data in an [n_observations, n_features] matrix
+def firstKmeans():
+
+    kmeans_first = KMeans()
+    return 'result'
+
+
+def organiseData():
+
+    pass
+
 
 
 # Test the SVM clustering library on example data
 # This is an example of supervised learning, using the sklearn
 # test dataset
+@app.route("/api/test/svmclustering/")
 def testClustering():
     iris = datasets.load_iris()
     print(iris.data)   
@@ -81,6 +105,7 @@ def testClustering():
 
 # This will be an example of the k-means clustering algorithm,
 # which is an unsupervised learning algorithm
+@app.route("/api/test/kmeans")
 def testKmeans():
     
     iris = datasets.load_iris()
@@ -92,12 +117,11 @@ def testKmeans():
     kmeans_iris.fit(iris.data)
 
     # Get attributes of the clustering operation
-    print('kmeans_iris cluster centers')
+    print('Display kmeans_iris cluster centers')
     print(kmeans_iris.cluster_centers_)
-    print('kmeans_iris labels')
+    print('Display kmeans_iris labels')
     print(kmeans_iris.labels_)
     pass
-
 
 
 
