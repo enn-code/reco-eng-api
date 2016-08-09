@@ -36,31 +36,42 @@ def getData():
     coll = db.training_data
     cursorObject = coll.find()
     data_array = []
-    data_dict = []
+    data_full = []
 
     data_tags = ['animals', 'cats', 'cute', 'funny', 'fruit', 'food', 'vegetables', 'feminism', 'sport', 'women', 'men', 'sexy', 'hot', 'football', 'athletics', 'hockey', 'training', 'routines', 'healthy', 'workout', 'tv', 'celebrity', 'movies', 'comedy', 'drama', 'youtube']
 
-    for document in cursorObject:
-        data_dict.append(document)
+    # For each observation
+    for observation in cursorObject:
+        # Save the observations to a complete array for test purposes
+        data_full.append(observation)
+        # Initialise a row of zeroes
         data_array.append([0] * len(data_tags))
-        tags = document['Tags'].split(",")
+        # Get tags for current observation
+        tags = observation['Tags'].split(", ")
 
-        
+        print(observation)
+
+        # For each item in data_tags pool of tags
         for i in range(len(data_tags)):
+            # For each item in our returned set of tags
             for j in range(len(tags)):
                 #print(str(tags[j]))
                 #print(type(str(tags[j])))
                 #print(data_tags[i])
                 #print(type(data_tags[i]))
+                # When one our tags matches
+                print(tags[j])
+                print(data_tags[i])
+                print(i)
+                print(j)
                 if str(tags[j]) == data_tags[i]:
-                    print('equal')
+                    print('==equal==')
+                    # Set the last list at position that matches data_tags array, inside the data_array
                     data_array[-1][i] = 1
-                else:
-                    print('not equal')
-                    data_array[-1][i] = 0
+                    print(tags)
+                    print(tags[j])
             
 
-        print(document)
 
     print(data_array[0])
     print('json test')
