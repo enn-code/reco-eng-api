@@ -42,7 +42,24 @@ def getData():
 
     for document in cursorObject:
         data_dict.append(document)
-        data_array.append(document['Tags'].split(","))
+        data_array.append([0] * len(data_tags))
+        tags = document['Tags'].split(",")
+
+        
+        for i in range(len(data_tags)):
+            for j in range(len(tags)):
+                #print(str(tags[j]))
+                #print(type(str(tags[j])))
+                #print(data_tags[i])
+                #print(type(data_tags[i]))
+                if str(tags[j]) == data_tags[i]:
+                    print('equal')
+                    data_array[-1][i] = 1
+                else:
+                    print('not equal')
+                    data_array[-1][i] = 0
+            
+
         print(document)
 
     print(data_array[0])
