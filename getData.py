@@ -38,6 +38,12 @@ def getData():
 
     prefs_array = preferencesToArray(cursorObject)
     print(prefs_array)
+    print(type(prefs_array))
+
+    
+    prefs_cut_array = [item[1:] for item in prefs_array]
+    print(prefs_cut_array)
+    firstKmeans(prefs_cut_array)
 
     # Get tag data and put into a binary array for each observation
     #tags_array = str(tagsToBinary(cursorObject))
@@ -46,12 +52,41 @@ def getData():
     
     return str(prefs_array)
 
+
 def displayArray(input_array):
     for i in range(len(input_array)):
         print(input_array[i])
 
     print(input_array[0][0])
     pass
+
+
+
+# Get a single user
+@app.route("/api/data/<userId>")
+def getUserData(userId):
+    pass
+
+
+# Use KMeans clustering on my dataset
+@app.route("/api/clustered/")
+def performClustering():
+    result = firstKmeans()
+    return str(result)
+
+
+# First attempt at KMeans with our main dataset
+# Needs: Our data in an [n_observations, n_features] matrix
+def firstKmeans(data):
+
+    kmeans = KMeans(n_clusters=4)
+    kmeans.fit(data)
+
+    print('kmeans!')
+    print(data)
+    print(kmeans.cluster_centers_)
+    print(kmeans.labels_)
+    return kmeans
 
 
 # Convert observed user behaviour (preferences) to array
@@ -63,10 +98,8 @@ def preferencesToArray(cursorObject):
     i = 0
     for observation in cursorObject:
         print(observation)
-        prefs_list = []
         print(observation['u1'])
-        prefs_list.append([observation['Id'], observation['u1'], observation['u2'], observation['u3'], observation['u4'], observation['u5']])
-        prefs_array.append(prefs_list)
+        prefs_array.append([observation['Id'], observation['u1'], observation['u2'], observation['u3'], observation['u4'], observation['u5']])
         i += 1
 
     print(prefs_array)
@@ -108,40 +141,13 @@ def tagsToBinary(cursorObject):
     return data_array
 
 
-
-# Get a single user
-@app.route("/api/data/<userId>")
-def getUserData(userId):
-    pass
-
-
-# Use KMeans clustering on my dataset
-@app.route("/api/clustered/")
-def performClustering():
-    result = firstKmeans()
-    return str(result)
-
-
-# First attempt at KMeans with our main dataset
-# Needs: Our data in an [n_observations, n_features] matrix
-def firstKmeans():
-
-    kmeans_first = KMeans()
-    return 'result'
-
-
-def organiseData():
-
-    pass
-
-
-
 # Test the SVM clustering library on example data
 # This is an example of supervised learning, using the sklearn
 # test dataset
 @app.route("/api/test/svmclustering/")
 def testClustering():
     iris = datasets.load_iris()
+    print(iris)
     print(iris.data)   
 
     print(iris.target)
@@ -178,6 +184,7 @@ def testKmeans():
     print('Display kmeans_iris labels')
     print(kmeans_iris.labels_)
     pass
+
 
 
 
