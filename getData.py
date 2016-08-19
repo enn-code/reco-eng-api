@@ -31,15 +31,10 @@ def rootPage():
 # Get all user data
 @app.route("/api/data/")
 def getData():
-    client = MongoClient()
-    db = client.recodb
-    coll = db.training_data
-    cursorObject = coll.find()
-
+    cursorObject = databaseData()
     prefs_array = preferencesToArray(cursorObject)
     print(prefs_array)
     print(type(prefs_array))
-
     
     prefs_cut_array = [item[1:] for item in prefs_array]
     print(prefs_cut_array)
@@ -52,6 +47,23 @@ def getData():
     
     return str(prefs_array)
 
+
+@app.route("/api/version1/")
+def version1():
+    cursorObject = databaseData()
+
+    # Count times each user views an article with a given tag
+    countTagOccurances()
+
+def countTageOccurances():
+    print 'hello'
+
+def databaseData():
+    client = MongoClient()
+    db = client.recodb
+    coll = db.training_data
+    cursorObject = coll.find()
+    return cursorObject
 
 def displayArray(input_array):
     for i in range(len(input_array)):
