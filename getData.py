@@ -1,6 +1,9 @@
 """Script to get mongodb data"""
 import sys
 import json
+
+import algorithm # custom lib for my recommendation algo
+
 from pymongo import MongoClient
 
 from flask import Flask, request
@@ -41,22 +44,24 @@ def getData():
     firstKmeans(prefs_cut_array)
 
     # Get tag data and put into a binary array for each observation
-    #tags_array = str(tagsToBinary(cursorObject))
-    
+
+
     displayArray(prefs_array)
     
     return str(prefs_array)
 
 
+# Version 1 of our algorithm
 @app.route("/api/version1/")
 def version1():
     cursorObject = databaseData()
 
+    totalsArray = algorithm.countTagOccurances(cursorObject)
+    
+    
     # Count times each user views an article with a given tag
-    countTagOccurances()
+    return str(totalsArray)
 
-def countTageOccurances():
-    print 'hello'
 
 def databaseData():
     client = MongoClient()
@@ -65,13 +70,13 @@ def databaseData():
     cursorObject = coll.find()
     return cursorObject
 
+
 def displayArray(input_array):
     for i in range(len(input_array)):
         print(input_array[i])
 
     print(input_array[0][0])
     pass
-
 
 
 # Get a single user
@@ -117,40 +122,6 @@ def preferencesToArray(cursorObject):
     print(prefs_array)
     return prefs_array
 
-
-# Get tag data from cursor object and register as binary array
-def tagsToBinary(cursorObject):
-    data_array = []
-    data_full = []
-    data_tags = ['animals', 'cats', 'cute', 'funny', 'fruit', 'food', 'vegetables', 'feminism', 'sport', 'women', 'men', 'sexy', 'hot', 'football', 'athletics', 'hockey', 'training', 'routines', 'healthy', 'workout', 'tv', 'celebrity', 'movies', 'comedy', 'drama', 'youtube']
-
-    # For each observation
-    for observation in cursorObject:
-        # Save the observations to a complete array for test purposes
-        data_full.append(observation)
-        # Initialise a row of zeroes
-        data_array.append([0] * len(data_tags))
-        # Get tags for current observation
-        tags = observation['Tags'].split(", ")
-
-        print(observation)
-
-        # For each item in data_tags pool of tags
-        for i in range(len(data_tags)):
-            # For each item in our returned set of tags
-            for j in range(len(tags)):
-                # When one of our tags matches
-                if str(tags[j]) == data_tags[i]:
-                    print('==equal==')
-                    # Set the last list at position that matches data_tags array, inside the data_array
-                    data_array[-1][i] = 1
-                    print(tags)
-                    print(tags[j])
-            
-
-
-    print(data_array)
-    return data_array
 
 
 # Test the SVM clustering library on example data
