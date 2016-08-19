@@ -5,18 +5,26 @@ def countTagOccurances(cursorObject):
     curs = cursorObject
 
     # Get our data into a list (for 5 users)
-    prefsList = cursorToList(curs)
-    prefsArray = listToMatrix(prefsList)
+    dataList = cursorToList(curs)
+    dataArray = listToMatrix(dataList)
+    
+    print(dataArray)
+    print(dataArray[:, 2:])
 
-    tagsList = tagsToBinary(curs)
+    # Put preferences into array
+    prefsArray = listToIntMatrix(dataArray[:, 2:])
+
+    # Get only tags
+    tags = dataArray[:,:2]
+    # Get tags as a binary array
+    tagsList = tagsToBinary(tags)
     tagsArray = listToMatrix(tagsList)
 
-    print(prefsArray)
-    print(tagsArray)
+    print(type(prefsArray[0,0]))
+    print(type(tagsArray[0,0]))
 
-    print 'multiply arrays'
-    print(numpy.dot(tagsArray * prefsArray))
-
+    # Get tag totals for each user and then weight them
+    print(weightedPrefs(prefsArray, tagsArray))
 
     print 'hello'
     print prefsArray
@@ -26,19 +34,22 @@ def countTagOccurances(cursorObject):
 def cursorToList(cursorObject):
     data_array = []
 
-    # Keep track of current observation
-    i = 0
     for observation in cursorObject:
         print(observation)
         print(observation['u1'])
-        data_array.append([observation['Id'], observation['u1'], observation['u2'], observation['u3'], observation['u4'], observation['u5']])
-        i += 1
+        print(type(str(observation['Tags'])))
+        # data_array.append(observation)
+        data_array.append([str(observation['Tags']), str(observation['Id']), int(observation['u1']), int(observation['u2']), int(observation['u3']), int(observation['u4']), int(observation['u5'])])
 
     return data_array
 
 
 def listToMatrix(list):
     arr = numpy.array(list)
+    return arr
+
+def listToIntMatrix(list):
+    arr = numpy.array(list, dtype=numpy.int16)
     return arr
 
 
@@ -57,7 +68,7 @@ def tagsToBinary(cursorObject):
         # Initialise a row of zeroes
         data_array.append([0] * len(data_tags))
         # Get tags for current observation
-        tags = observation['Tags'].split(", ")
+        tags = observation[0].split(", ")
 
         # print(observation)
 
@@ -65,7 +76,7 @@ def tagsToBinary(cursorObject):
         for i in range(len(data_tags)):
             # For each item in our returned set of tags
             for j in range(len(tags)):
-                # When one of our tags matches
+                # When one of our tags match
                 if str(tags[j]) == data_tags[i]:
                     print('==equal==')
                     # Set the last list at position that matches data_tags array, inside the data_array
@@ -73,9 +84,49 @@ def tagsToBinary(cursorObject):
                     # print(tags)
                     # print(tags[j])
             
-
-
-    print(data_array)
-    print(type(data_array))
+    # print(data_array)
+    # print(type(data_array))
     return data_array
 
+# Takes two arrays with compatible type
+def weightedPrefs(prefs_array, tags_array):
+    print 'multiply arrays'
+
+    n_users = prefs_array.shape[1]
+    n_articles = prefs_array.shape[0]
+    userTagsArrayList = []
+
+    print(userTagsArrayList)
+
+    # For each user
+    for u_id in range(n_users):
+        # Initialise list for appending later
+        userTagsArrayList.append([0])
+        for art_id in range(n_articles):        
+
+            print('user art rating')
+            print(art_id, u_id)
+            print(prefs_array[art_id, u_id])
+            print(tags_array[art_id])
+            # Perform multiplication tags vector * user prefs
+            multiplyVector = numpy.dot(tags_array[art_id], prefs_array[art_id, u_id])
+            userTagsArrayList[u_id].append(multiplyVector)
+
+    # Need to cut the list down
+    print('userTagsArrayList')
+    print(userTagsArrayList)
+    print('userTagsArrayList[1][1:]')
+    print(userTagsArrayList[1][1:])
+    
+    totalTagsArray = []
+
+    # Add the tags for each user and return array of totals
+    for i in range(5):
+        userAllTags = listToMatrix(userTagsArrayList[i][1:])
+        sumUserTags = numpy.sum(userAllTags, axis=0)
+        totalTagsArray.append(sumUserTags)
+
+    print('totals')    
+    print(totalTagsArray)
+
+    return totalTagsArray
