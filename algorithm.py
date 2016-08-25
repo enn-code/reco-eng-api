@@ -1,4 +1,5 @@
 import numpy
+from sklearn.cluster import KMeans
 
 
 def countTagOccurances(cursorObject):
@@ -24,14 +25,19 @@ def countTagOccurances(cursorObject):
     print(type(tagsArray[0,0]))
 
     # Get tag totals for each user and then weight them
-    print(weightedPrefs(prefsArray, tagsArray))
+    weightedPrefsDict = weightedPrefs(prefsArray, tagsArray)
+    print(weightedPrefsDict)
 
-    print 'hello'
-    print prefsArray
-    return prefsArray
+    weightedPrefsArray = dictionaryToMatrix(weightedPrefsDict)
+    print(weightedPrefsArray)
+    clusters = clusterData(weightedPrefsArray)
+    print(clusters)
+
+    print 'Final result'
+    return weightedPrefsArray
 
 
-def cursorToList(cursorObject):
+def cursorToList(cursorObject):   # add to library
     data_array = []
 
     for observation in cursorObject:
@@ -44,11 +50,16 @@ def cursorToList(cursorObject):
     return data_array
 
 
-def listToMatrix(list):
+def listToMatrix(list):     # add to library
     arr = numpy.array(list)
     return arr
 
-def listToIntMatrix(list):
+def dictionaryToMatrix(dict):     # add to library
+    # arr = numpy.array(dict.items())
+    arr = numpy.array([val for (key,val) in dict.iteritems()])
+    return arr
+
+def listToIntMatrix(list):    # add to library
     arr = numpy.array(list, dtype=numpy.int16)
     return arr
 
@@ -119,14 +130,40 @@ def weightedPrefs(prefs_array, tags_array):
     print(userTagsArrayList[1][1:])
     
     totalTagsArray = []
+    totalTagsConsumed = []
 
     # Add the tags for each user and return array of totals
     for i in range(5):
         userAllTags = listToMatrix(userTagsArrayList[i][1:])
         sumUserTags = numpy.sum(userAllTags, axis=0)
         totalTagsArray.append(sumUserTags)
+        print('sumUserTags')
+        print(sumUserTags)
+        # Turn content consumption into weighted consumption
+        # TODO: Turn into a function
+        totalTagsConsumed.append(numpy.sum(sumUserTags, axis=0))
+
+        print(totalTagsConsumed)
 
     print('totals')    
     print(totalTagsArray)
 
-    return totalTagsArray
+    # Turn content consumption into weighted consumption
+    weightedArray = {}
+    for i in range(5):
+        weightedArray["user{0}".format(i)] = []
+        for j in range(len(totalTagsArray[0])):
+            tagWeighting = totalTagsArray[i][j] / float(totalTagsConsumed[i])
+            print(tagWeighting)
+            weightedArray["user{0}".format(i)].append(tagWeighting)
+
+    print(weightedArray)
+    return weightedArray
+
+
+def clusterData(data):
+    kmeans = KMeans(n_clusters=3)
+    kmeans.fit(data)
+    print(kmeans.cluster_centers_)
+    print(kmeans.labels_)
+    return kmeans.labels_

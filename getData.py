@@ -57,7 +57,7 @@ def version1():
     cursorObject = databaseData()
 
     totalsArray = algorithm.countTagOccurances(cursorObject)
-    
+
     
     # Count times each user views an article with a given tag
     return str(totalsArray)
@@ -71,7 +71,7 @@ def databaseData():
     return cursorObject
 
 
-def displayArray(input_array):
+def displayArray(input_array):      # add to library
     for i in range(len(input_array)):
         print(input_array[i])
 
