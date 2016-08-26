@@ -30,7 +30,7 @@ def countTagOccurances(cursorObject):
 
     weightedPrefsArray = dictionaryToMatrix(weightedPrefsDict)
     print(weightedPrefsArray)
-    clusters = clusterData(weightedPrefsArray)
+    clusters = clusterData(weightedPrefsArray, tagsArray[1,:])
     print(clusters)
 
     print 'Final result'
@@ -161,9 +161,23 @@ def weightedPrefs(prefs_array, tags_array):
     return weightedArray
 
 
-def clusterData(data):
+def clusterData(data, articleWithBinaryTags):
+    # Initialise kmeans
     kmeans = KMeans(n_clusters=3)
     kmeans.fit(data)
-    print(kmeans.cluster_centers_)
-    print(kmeans.labels_)
-    return kmeans.labels_
+
+    cluster_centroids = kmeans.cluster_centers_
+    cluster_labels = kmeans.labels_
+    print(cluster_centroids)
+    print(cluster_labels)
+
+    print(articleWithBinaryTags)
+ 
+    # Find closest fitting cluster for an article with a given set of tags
+    print(kmeans.predict(articleWithBinaryTags.reshape(1,-1)))
+
+    return cluster_labels
+
+
+
+
