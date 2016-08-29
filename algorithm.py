@@ -30,8 +30,15 @@ def countTagOccurances(cursorObject):
 
     weightedPrefsArray = dictionaryToMatrix(weightedPrefsDict)
     print(weightedPrefsArray)
-    clusters = clusterData(weightedPrefsArray, tagsArray[1,:])
-    print(clusters)
+    kmeans = clusterData(weightedPrefsArray)
+    kmeansClusters = kmeans.labels_
+    print(kmeansClusters)
+
+    articleClustersList = groupArticles(kmeans, tagsArray)
+    print(articleClustersList)
+
+    # Recommend the top article in the cluster
+    topClusterRecommendation = recommendTopArticle(prefsArray, kmeansClusters, articleClustersList)
 
     print 'Final result'
     return weightedPrefsArray
@@ -148,7 +155,9 @@ def weightedPrefs(prefs_array, tags_array):
     print('totals')    
     print(totalTagsArray)
 
+
     # Turn content consumption into weighted consumption
+    # TODO: Turn into function
     weightedArray = {}
     for i in range(5):
         weightedArray["user{0}".format(i)] = []
@@ -161,7 +170,7 @@ def weightedPrefs(prefs_array, tags_array):
     return weightedArray
 
 
-def clusterData(data, articleWithBinaryTags):
+def clusterData(data):
     # Initialise kmeans
     kmeans = KMeans(n_clusters=3)
     kmeans.fit(data)
@@ -171,13 +180,90 @@ def clusterData(data, articleWithBinaryTags):
     print(cluster_centroids)
     print(cluster_labels)
 
-    print(articleWithBinaryTags)
- 
-    # Find closest fitting cluster for an article with a given set of tags
-    print(kmeans.predict(articleWithBinaryTags.reshape(1,-1)))
-
-    return cluster_labels
+    
+    return kmeans
 
 
+# Use Kmeans to predict which consumer group each article fits into
+def groupArticles(kmeans, binaryArticles):
+    print(binaryArticles)
+
+    numberArticles = binaryArticles.shape[0]
+    articleClusters = numpy.array([])
+
+    for i in range(numberArticles):
+        # Find closest fitting cluster for an article with a given set of tags
+        articleGroup = kmeans.predict(binaryArticles[i,:].reshape(1,-1))
+        articleClusters = numpy.append(articleClusters, articleGroup)
+
+        
+    # TODO: Get number of articles in each group, get number of users too
+
+    print(articleClusters)    
+    return articleClusters
+
+
+# For each user group, find most popular article that falls in that group
+def recommendTopArticle(prefsArray, kmeansClusters, articleClusters):
+    
+    preferenceList = {}
+    # userIndices = numpy.zeros((max(kmeansClusters)+1))
+    # userPrefsByGroup = numpy.zeros((max(kmeansClusters)+1))
+    
+    userIndices = []
+    userPrefsByGroup = []
+
+    print(userPrefsByGroup)
+
+    for cluster in kmeansClusters:
+        print(cluster)
+        for i in range(len(kmeansClusters)):
+            userIndices[cluster].append(i)
+            # userPrefsByGroup[cluster] = numpy.array(numpy.append(userPrefsByGroup[cluster], float(i)))
+
+    print(userIndices)
+
+    for index in userIndices:
+        for i in range(len(userPrefsByGroup)):
+            userPrefsByGroup[i] = numpy.append(userPrefsByGroup[i], prefsArray[:, index])
+
+    print(userPrefsByGroup)
+
+    pass
+
+
+
+# For each user group, find most popular article that falls in that group
+def NOTESrecommendTopArticle(prefsArray, kmeansClusters, articleClusters):
+    # Takes in an array of preferences for each user in the group
+    # Takes a list of all articles in the group
+    # Filters so only matching items are left
+    # Finds article with highest total rating across this group
+
+    preferenceList = {}
+    
+    # For each user in cluster (kmeansClusters == groupNumber). Return user ids
+    #   For each article per user in cluster
+
+
+    for j in range(len(kmeansClusters)):
+        if preferenceList.get("group{0}".format(kmeansClusters[j])) == None:
+            preferenceList["group{0}".format(kmeansClusters[j])] = []
+
+        for i in range(len(articleClusters)):
+            # If user group is equal to article group
+            # if kmeansClusters[j] == articleClusters[i]:
+
+            userPrefs = prefsArray[i,j]
+            if kmeansClusters[j] == articleClusters[i]:
+                preferenceList["group{0}".format(kmeansClusters[j])].append(userPrefs)
+                print(userPrefs)
+
+    print(preferenceList)
+    print(len(preferenceList))
+    print(max(preferenceList))
+    print(preferenceList.index(max(preferenceList)))
+
+    pass
 
 
