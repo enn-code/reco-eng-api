@@ -40,8 +40,16 @@ def countTagOccurances(cursorObject):
     # Recommend the top article in the cluster
     topClusterRecommendation = recommendTopArticle(prefsArray, kmeansClusters, articleClustersList)
 
+    message = ''
+    for key, value in topClusterRecommendation.iteritems():
+        print(value)
+        recArticle = dataArray[value, 1]
+        print(dataArray[value, 1])
+        mess = 'For a user in cluster {0}, we recommend '.format(key) + recArticle
+        message = message + ' --- ' + mess
+
     print 'Final result'
-    return weightedPrefsArray
+    return message
 
 
 def cursorToList(cursorObject):   # add to library
@@ -208,28 +216,75 @@ def recommendTopArticle(prefsArray, kmeansClusters, articleClusters):
     
     preferenceList = {}
     # userIndices = numpy.zeros((max(kmeansClusters)+1))
-    # userPrefsByGroup = numpy.zeros((max(kmeansClusters)+1))
+    # userPrefsByGroup = numpy.zeros(shape=())
     
-    userIndices = []
+    userIndices = {}
     userPrefsByGroup = []
 
     print(userPrefsByGroup)
 
-    for cluster in kmeansClusters:
+
+    # For each user, put into cluster group whilst keeping the index
+    for i in range(len(kmeansClusters)):
+        cluster = kmeansClusters[i]
         print(cluster)
-        for i in range(len(kmeansClusters)):
-            userIndices[cluster].append(i)
-            # userPrefsByGroup[cluster] = numpy.array(numpy.append(userPrefsByGroup[cluster], float(i)))
+
+        groupName = "group{0}".format(cluster)
+        print(groupName)
+
+        if userIndices.get(groupName) == None:
+            userIndices[groupName] = []
+
+        userIndices[groupName].append(i)
+        # userPrefsByGroup[cluster] = numpy.array(numpy.append(userPrefsByGroup[cluster], float(i)))
 
     print(userIndices)
 
-    for index in userIndices:
-        for i in range(len(userPrefsByGroup)):
-            userPrefsByGroup[i] = numpy.append(userPrefsByGroup[i], prefsArray[:, index])
+    # Slice each user's full prefs into arrays, listed by group
+    userPrefsByGroup = {}
+    for key, value in userIndices.iteritems():
+        for index in range(len(value)):
+            if userPrefsByGroup.get(key) == None:
+                userPrefsByGroup[key] = []
+
+            # print(index,key,value,userPrefsByGroup[key])
+            userPrefsByGroup[key].append(prefsArray[:, value[index]])
 
     print(userPrefsByGroup)
 
-    pass
+    sumUserPrefsByGroup = {}
+    topRatedIndex = {}
+    for key, value in userPrefsByGroup.iteritems():
+        if sumUserPrefsByGroup.get(key) == None:
+            sumUserPrefsByGroup[key] = []
+
+        # Gives us the sum of all user prefs for each group
+        sumUserPrefsByGroup[key] = numpy.sum(userPrefsByGroup[key], axis=0)
+
+        print(sumUserPrefsByGroup[key])
+
+        # Set each article not in group to 0
+        for i in range(len(articleClusters)):
+            print(sumUserPrefsByGroup[key][i])
+            print(key)
+            print("group{}".format(int(articleClusters[i])))
+            if key != "group{}".format(int(articleClusters[i])):
+                print('not equal')
+                print(sumUserPrefsByGroup[key])
+                print(i)
+                sumUserPrefsByGroup[key][i] = 0
+
+        print(sumUserPrefsByGroup[key])
+        # Find where the maximum lies
+        print 'argmax'
+        print(sumUserPrefsByGroup[key].argmax(axis=0))
+        topRatedIndex[key] = sumUserPrefsByGroup[key].argmax(axis=0)
+
+    print(topRatedIndex)
+    print(sumUserPrefsByGroup)
+    print(userIndices)
+
+    return topRatedIndex
 
 
 
