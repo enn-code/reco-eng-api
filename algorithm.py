@@ -1,6 +1,9 @@
 import numpy
 from sklearn.cluster import KMeans
 
+import collections # Handle unordered dictionaries
+import re # For extracting digits from string
+
 
 def countTagOccurances(cursorObject):
     curs = cursorObject
@@ -55,17 +58,43 @@ def countTagOccurances(cursorObject):
     return message
 
 
+def get_key(key):
+    ''' Used to help sort unordered dictionaries '''
+    try:
+        key = re.sub("\D", "", key) # Strip out non-digits
+        return int(key)
+    except ValueError:
+        return str(key)
+
+
 def cursorToList(cursorObject):   # add to library
-    data_array = []
+    data_list = []
+
+    # print('cursorObject')
+    # print(cursorObject)
+    # print('SORTED cursorObject')
+    # print(sorted(cursorObject))
 
     for observation in cursorObject:
+        print('observation')
         print(observation)
-        print(observation['u1'])
-        print(type(str(observation['Tags'])))
+        # print(collections.OrderedDict(observation))
+        # print(sorted(observation))
+        obsOrdered = collections.OrderedDict(sorted(observation.items(), key=lambda t: get_key(t[0])))
+        print(obsOrdered)
         # data_array.append(observation)
-        data_array.append([str(observation['Tags']), str(observation['Id']), int(observation['u1']), int(observation['u2']), int(observation['u3']), int(observation['u4']), int(observation['u5'])])
+        data_list.append([str(obsOrdered['Tags']), str(obsOrdered['Id']), int(obsOrdered['u1']), int(obsOrdered['u2']), int(obsOrdered['u3']), int(obsOrdered['u4']), int(obsOrdered['u5'])])
+# http://stackoverflow.com/questions/17376700/sort-alphanumeric-strings-in-numpy-matrix
 
-    return data_array
+# def get_key(key):
+#     try:
+#         return int(key)
+#     except ValueError:
+#         return key
+# a = {'100':12,'6':5,'88':3,'test':34, '67':7,'1':64 }
+# b = collections.OrderedDict(sorted(a.items(), key=lambda t: get_key(t[0])))
+
+    return data_list
 
 
 def listToMatrix(list):     # add to library
@@ -91,8 +120,8 @@ def tagsToBinary(cursorObject):
 
     # For each observation
     for observation in cursorObject:
-        print 'observation'
-        print observation
+        # print 'observation'
+        # print observation
 
         # Initialise a row of zeroes
         data_array.append([0] * len(data_tags))
@@ -107,7 +136,7 @@ def tagsToBinary(cursorObject):
             for j in range(len(tags)):
                 # When one of our tags match
                 if str(tags[j]) == data_tags[i]:
-                    print('==equal==')
+                    # print('==equal==')
                     # Set the last list at position that matches data_tags array, inside the data_array
                     data_array[-1][i] = 1
                     # print(tags)
@@ -133,19 +162,19 @@ def weightedPrefs(prefs_array, tags_array):
         userTagsArrayList.append([0])
         for art_id in range(n_articles):        
 
-            print('user art rating')
-            print(art_id, u_id)
-            print(prefs_array[art_id, u_id])
-            print(tags_array[art_id])
+            # print('user art rating')
+            # print(art_id, u_id)
+            # print(prefs_array[art_id, u_id])
+            # print(tags_array[art_id])
             # Perform multiplication tags vector * user prefs
             multiplyVector = numpy.dot(tags_array[art_id], prefs_array[art_id, u_id])
             userTagsArrayList[u_id].append(multiplyVector)
 
     # Need to cut the list down
-    print('userTagsArrayList')
-    print(userTagsArrayList)
-    print('userTagsArrayList[1][1:]')
-    print(userTagsArrayList[1][1:])
+    # print('userTagsArrayList')
+    # print(userTagsArrayList)
+    # print('userTagsArrayList[1][1:]')
+    # print(userTagsArrayList[1][1:])
     
     totalTagsArray = []
     totalTagsConsumed = []
@@ -174,7 +203,7 @@ def weightedPrefs(prefs_array, tags_array):
         weightedArray["user{0}".format(i)] = []
         for j in range(len(totalTagsArray[0])):
             tagWeighting = totalTagsArray[i][j] / float(totalTagsConsumed[i])
-            print(tagWeighting)
+            # print(tagWeighting)
             weightedArray["user{0}".format(i)].append(tagWeighting)
 
     print(weightedArray)
