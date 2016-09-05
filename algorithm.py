@@ -10,7 +10,7 @@ def countTagOccurances(cursorObject):
     dataArray = listToMatrix(dataList)
     
     print(dataArray)
-    print(dataArray[:, 2:])
+    #print(dataArray[:, 2:])
 
     # Put preferences into array
     prefsArray = listToIntMatrix(dataArray[:, 2:])
@@ -21,8 +21,8 @@ def countTagOccurances(cursorObject):
     tagsList = tagsToBinary(tags)
     tagsArray = listToMatrix(tagsList)
 
-    print(type(prefsArray[0,0]))
-    print(type(tagsArray[0,0]))
+    #print(type(prefsArray[0,0]))
+    #print(type(tagsArray[0,0]))
 
     # Get tag totals for each user and then weight them
     weightedPrefsDict = weightedPrefs(prefsArray, tagsArray)
@@ -32,9 +32,12 @@ def countTagOccurances(cursorObject):
     print(weightedPrefsArray)
     kmeans = clusterData(weightedPrefsArray)
     kmeansClusters = kmeans.labels_
+
+    print('clusters')
     print(kmeansClusters)
 
     articleClustersList = groupArticles(kmeans, tagsArray)
+    print('articleClusters')
     print(articleClustersList)
 
     # Recommend the top article in the cluster
@@ -192,8 +195,8 @@ def clusterData(data):
     return kmeans
 
 
-# Use Kmeans to predict which consumer group each article fits into
 def groupArticles(kmeans, binaryArticles):
+# Use Kmeans to predict which consumer group each article fits into
     print(binaryArticles)
 
     numberArticles = binaryArticles.shape[0]
@@ -211,8 +214,8 @@ def groupArticles(kmeans, binaryArticles):
     return articleClusters
 
 
+def recommendTopArticle(prefsArray, kmeansClusters, articleClusters): 
 # For each user group, find most popular article that falls in that group
-def recommendTopArticle(prefsArray, kmeansClusters, articleClusters):
     
     preferenceList = {}
     # userIndices = numpy.zeros((max(kmeansClusters)+1))
@@ -288,8 +291,8 @@ def recommendTopArticle(prefsArray, kmeansClusters, articleClusters):
 
 
 
-# For each user group, find most popular article that falls in that group
 def NOTESrecommendTopArticle(prefsArray, kmeansClusters, articleClusters):
+# For each user group, find most popular article that falls in that group
     # Takes in an array of preferences for each user in the group
     # Takes a list of all articles in the group
     # Filters so only matching items are left
